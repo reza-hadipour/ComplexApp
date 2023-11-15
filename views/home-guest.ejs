@@ -33,6 +33,10 @@
 
 <div class="container py-md-5">
 
+  <% errors.forEach(error => { %>
+    <div class="alert alert-danger text-center"><%= error %></div>
+  <% }); %>
+
   <div class="row align-items-center">
     <div class="col-lg-7 py-3 py-md-5">
       <h1 class="display-3">Remember Writing?</h1>      
@@ -55,6 +59,14 @@
             <label for="password-register" class="text-muted mb-1"><small>Password</small></label>
             <input name="password" id="password-register" class="form-control" type="password" placeholder="Create a password">
           </div>
+
+          <div class="form-group">
+            <% regErrors.forEach(error => { %>
+              <label  class="alert alert-danger small mb-1"> <%= error %> </label>
+            <% }) %>
+          </div>
+
+          
           
           <button type="submit" class="py-3 mt-4 btn btn-lg btn-success btn-block">Sign up for OurApp</button>
           
