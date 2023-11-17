@@ -16,9 +16,8 @@
   
   <div class="container py-md-5 container--narrow">
 
-    <% errors.forEach(error => { %>
-      <div class="alert alert-danger text-center"><%= error %></div>
-    <% }); %>
+    <!-- Flash Messages -->
+    <%- include('includes/flash')  %>
     
     <div class="text-center">
       <h2>Hello <strong><%= user.username %></strong>, your feed is empty.</h2>

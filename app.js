@@ -24,7 +24,14 @@ app.set('views','views');
 
 // To access data in views
 app.use((req,res,next)=>{
+
+    // make all success and error flash message access from all template
+    res.locals.success = req.flash('success');
+    res.locals.errors = req.flash('errors');
+    
+    // make current user id available on the req object
     req.session.user? req.visitorId = req.session.user.userId : req.visitorId = 0;
+
     // Let view access the data
     res.locals.user = req.session.user;
     next();

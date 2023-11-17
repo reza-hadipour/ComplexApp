@@ -3,7 +3,7 @@ const ObjectId = require('mongodb').ObjectId;
 
 let Post = function(data,authorId = null, requestedId = null){
     this.data = data
-    this.data.author = new ObjectId(authorId);
+    this.data.author = authorId;
     this.errors = [];
     this.requestedId = requestedId;
 }
@@ -13,10 +13,10 @@ Post.prototype.cleanUp = function(){
     if(typeof(this.data.body) != 'string') this.data.body = "";
 
     this.data = {
-        title: this.data.title.trim().toLowerCase(),
-        body: this.data.body.trim().toLowerCase(),
+        title: this.data.title.trim(),
+        body: this.data.body.trim(),
         createdDate: new Date(),
-        author: this.data.author
+        author: new ObjectId(this.data.author)
     }
 }
 
@@ -44,6 +44,37 @@ Post.prototype.createPost = function(){
             }).catch((err)=>{
                 reject(err);
             });
+        }
+    })
+}
+
+Post.prototype.update = function(){
+    return new Promise(async (resolve,reject)=>{
+        try {
+            let post = await Post.getPostById(this.requestedId,this.data.author)
+            if(post.isVisitorOwner){
+                // actually update the db
+                let status = await this.actuallyUpdate();
+                resolve(status);
+            }else{
+                reject()
+            }
+        } catch (error) {
+            reject()
+        }
+    })
+}
+
+Post.prototype.actuallyUpdate = function(){
+    return new Promise(async (resolve,reject)=>{
+        this.cleanUp();
+        await this.validate();
+
+        if(!this.errors.length){
+            await postCollection.findOneAndUpdate({_id: new ObjectId(this.requestedId)},{$set: {title: this.data.title , body: this.data.body}})
+            resolve("success")
+        }else{
+            resolve("failure")
         }
     })
 }
@@ -93,17 +124,21 @@ Post.reusablePostQuery = function(uniqueOperation,visitorId){
 
         let posts = await postCollection.aggregate(aggOperations).toArray();
         
-        posts.map((post=>{
-            post.isVisitorOwner = post.authorId.equals(visitorId);
-            post.author = {
-                authorId: post.author._id,
-                username: post.author.username,
-                email: post.author.email
-            }
-            return post;
-        }));
-        
-        resolve(posts);
+        if(posts.length){
+            posts.map((post=>{
+                post.isVisitorOwner = post.authorId.equals(visitorId);
+                post.author = {
+                    authorId: post.author._id,
+                    username: post.author.username,
+                    email: post.author.email
+                }
+                return post;
+            }));
+            
+            resolve(posts);
+        }else{
+            reject('Post not found.')
+        }
     });
 }
 

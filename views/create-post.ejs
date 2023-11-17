@@ -15,10 +15,9 @@
     <%- include('includes/header') %>          
   
   <div class="container py-md-5 container--narrow">
-    <!-- Errors -->
-    <% errors.forEach(error => { %>
-        <div class="alert alert-danger small mt-1"><%= error %></div>
-    <% }); %>
+    
+    <!-- Flash Messages -->
+    <%- include('includes/flash')  %>
 
     <form action="/post/create" method="POST">
       <div class="form-group">
