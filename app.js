@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(session({
     secret: process.env.SESSION_SECRETKEY,
     store : MongoStore.create({mongoUrl: process.env.DATABASE_CONNECTION}),
-    cookie: {maxAge: 1000 * 60 * 60, httpOnly: true}, //1H
+    cookie: {maxAge: 1000 * 60 * 60 * 10, httpOnly: true}, //24H
     saveUninitialized: false,
     resave : false
 }));
@@ -21,6 +21,14 @@ app.use(flash());
 app.use(express.static('public'));
 app.set('view engine','ejs');
 app.set('views','views');
+
+// To access data in views
+app.use((req,res,next)=>{
+    req.session.user? req.visitorId = req.session.user.userId : req.visitorId = 0;
+    // Let view access the data
+    res.locals.user = req.session.user;
+    next();
+})
 
 // Set Routes
 app.use('/',routes);

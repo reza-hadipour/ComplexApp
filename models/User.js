@@ -63,7 +63,7 @@ User.prototype.register = async function(){
                 'password': bcrypt.hashSync(this.data.password,10)
             }).then(info=>{
                 resolve({
-                    _id: info.insertedId,
+                    userId: info.insertedId,
                     username: this.data.username,
                     email: this.data.email
                 })
@@ -83,6 +83,7 @@ User.prototype.login = async function(){
         userCollection.findOne({'username': this.data.username}).then(async user=>{
             if(user && bcrypt.compareSync(this.data.password,user.password)){
                 resolve({
+                    'userId': user._id,
                     'username': user.username,
                     'email': user.email
                 });
@@ -92,6 +93,23 @@ User.prototype.login = async function(){
         })
     })
 
+}
+
+User.ifUserExists = async function(username){
+    return new Promise(async (resolve,reject)=>{
+        let user = await userCollection.findOne({'username': username});
+        if(user){
+            user = {
+               'userId': user._id,
+               'username': user.username,
+               'email': user.email
+            };
+            resolve(user);
+        }else{
+            reject('User profile not found')
+        }
+    })
+    
 }
 
 module.exports = User;
