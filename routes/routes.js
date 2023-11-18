@@ -1,7 +1,11 @@
 const router = require('express').Router();
 // const userController = require('../controllers/userController');
+
+// User Controller
 const {register ,login ,logout ,ifUserExists ,showProfile ,home ,mustBeLoggedIn} = require('../controllers/userController');
-const {showCreatePost ,createPost ,showPost, showEditPost, editPost} = require('../controllers/postController');
+
+// Post Controller
+const {showCreatePost ,createPost ,showPost, showEditPost, editPost, deletePost} = require('../controllers/postController');
 
 router.get('/',home)
 
@@ -16,6 +20,7 @@ router.get('/post/:id',mustBeLoggedIn ,showPost);
 
 router.get('/post/:id/edit', mustBeLoggedIn, showEditPost);
 router.post('/post/:id/edit', mustBeLoggedIn, editPost);
+router.post('/post/:id/delete', mustBeLoggedIn, deletePost);
 
 // Profile routes
 router.get('/profile/:username',ifUserExists, showProfile);

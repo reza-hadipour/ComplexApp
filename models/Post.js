@@ -1,5 +1,6 @@
 const postCollection = require('../db').collection('posts');
 const ObjectId = require('mongodb').ObjectId;
+const sanitizeHtml = require('sanitize-html');
 
 let Post = function(data,authorId = null, requestedId = null){
     this.data = data
@@ -13,8 +14,8 @@ Post.prototype.cleanUp = function(){
     if(typeof(this.data.body) != 'string') this.data.body = "";
 
     this.data = {
-        title: this.data.title.trim(),
-        body: this.data.body.trim(),
+        title: sanitizeHtml(this.data.title.trim(),{allowedTags : ['i','b','u']}),
+        body: sanitizeHtml(this.data.body.trim(), {allowedTags : ['br','p','strong','i','b','u','ul','il','h1','h2','h3','h4','h5','h6'],allowedClasses: { 'p' : ['text-danger','text-success'], 'i' : ['text-primary']}}),
         createdDate: new Date(),
         author: new ObjectId(this.data.author)
     }
@@ -79,6 +80,32 @@ Post.prototype.actuallyUpdate = function(){
     })
 }
 
+Post.deleteById = function(postId,visitorId){
+    return new Promise(async (resolve,reject)=>{
+        try {
+            let post = await Post.getPostById(postId,visitorId);
+            if(post.isVisitorOwner){
+                postCollection.deleteOne({_id: new ObjectId(postId)}).then(info=>{
+                    if(info.deletedCount){
+                        resolve("success");
+                    }else{
+                        reject("failed")
+                    }
+                }).catch(err=>{
+                    reject(err);
+                });
+            }else{
+                reject('You don`t have permission to perform this action.')
+            }
+            
+        } catch (error) {
+            reject(error);
+        }
+
+    })
+    
+}
+
 Post.getPostById = function(postId,visitorId){
     return new Promise(async (resolve,reject)=>{
         if(typeof(postId) == "string" && ObjectId.isValid(postId)){
@@ -98,7 +125,10 @@ Post.getPostById = function(postId,visitorId){
 Post.getPostByAuthorId = function(authorId){
     return new Promise(async (resolve,reject)=>{
         if(ObjectId.isValid(authorId)){
-            Post.reusablePostQuery([{$match: {'author': new ObjectId(authorId)}}])
+            Post.reusablePostQuery([
+                {$match: {'author': new ObjectId(authorId)}},
+                {$sort: {'createdDate' : -1}}
+            ])
             .then((posts)=>{
                 resolve(posts);
             })

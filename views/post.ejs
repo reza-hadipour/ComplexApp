@@ -11,18 +11,21 @@
   <link rel="stylesheet" href="/main.css">
 </head>
 <body>
-      <%- include('includes/header')  %>>    
-  <!-- header ends here -->
+    <%- include('includes/header')  %>    
+    <!-- header ends here -->
   
   <div class="container py-md-5 container--narrow">
+    <!-- Flash Messages -->
+    <%- include('includes/flash')  %>
+
     <div class="d-flex justify-content-between">
-      <h2><%= post.title %></h2>
+      <h2><%- markDownHTML.parse(post.title) %></h2>
       <% if(post.isVisitorOwner) { %>
 
         <span class="pt-2">
           <a href="/post/<%= post._id %>/edit" class="text-primary mr-2" data-toggle="tooltip" data-placement="top" title="Edit"><i class="fas fa-edit"></i></a>
-          <form class="delete-post-form d-inline" action="#" method="POST">
-            <button class="delete-post-button text-danger" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fas fa-trash"></i></button>
+          <form class="delete-post-form d-inline" id="delete-form" action="/post/<%= post._id %>/delete" method="POST">
+            <button class="delete-post-button text-danger" data-toggle="tooltip" data-placement="top" id="delete-button" title="Delete"><i class="fas fa-trash"></i></button>
           </form>
         </span>
 
@@ -34,7 +37,7 @@
       Posted by <a href="/profile/<%= post.author.username %>"><%= post.author.username %></a> on <%= post.createdDate.getDate()%>/<%= post.createdDate.getMonth()+1 %>/<%= post.createdDate.getFullYear() %></p>
 
     <div class="body-content">
-      <%= post.body %>
+      <%- markDownHTML.parse(post.body) %>
     </div>
 
   </div>
@@ -46,5 +49,17 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
   <script>$('[data-toggle="tooltip"]').tooltip()</script>
+  <script>
+    let deleteForm = document.getElementById('delete-form');
+
+    deleteForm.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(confirm('Do tou want delete this post?')){
+        deleteForm.submit();
+      }
+  });
+      
+    
+  </script>
 </body>
 </html>

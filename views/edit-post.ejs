@@ -15,10 +15,10 @@
     <%- include('includes/header') %>          
   
   <div class="container py-md-5 container--narrow">
-    <!-- Errors -->
     
     <!-- Flash Messages -->
     <%- include('includes/flash')  %>
+    <a href="/post/<%= post._id %>" class="small">&lArr; Back to the post</a>
 
     <form action="/post/<%= post._id %>/edit/" method="POST">
       <div class="form-group">
@@ -28,7 +28,7 @@
 
       <div class="form-group">
         <label for="post-body" class="text-muted mb-1"><small>Body Content</small></label>
-        <textarea required name="body" id="post-body" class="body-content tall-textarea form-control" type="text"><%= post.body %></textarea>
+        <textarea required name="body" id="post-body" class="body-content tall-textarea form-control" type="text"><%= markDownHTML.parse(post.body) %></textarea>
       </div>
 
       <button class="btn btn-primary">Save Updates</button>

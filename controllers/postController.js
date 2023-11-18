@@ -19,6 +19,7 @@ module.exports.showCreatePost = function(req,res,next){
 
 module.exports.createPost = async function(req,res,next){
     new Post(req.body, req.session.user.userId).createPost().then((post=>{
+        req.flash('success','Post created successfully.')
         res.redirect(`/post/${post.insertedId}`)
     })).catch(err=>{
         req.flash('errors',err);
@@ -54,7 +55,7 @@ module.exports.editPost = function(req,res){
         if(status == "success"){
             req.flash('success','Post successfully updated.')
             req.session.save(()=>{
-                res.redirect(`/post/${req.params.id}/edit`)
+                res.redirect(`/post/${req.params.id}`)
             })
         } else {
             req.flash('errors',post.errors)
@@ -70,4 +71,25 @@ module.exports.editPost = function(req,res){
             res.redirect('/');
         })
     })
+}
+
+module.exports.deletePost = function(req,res){
+    Post.deleteById(req.params.id,req.visitorId).then((status)=>{
+        if(status == 'success'){
+            req.flash('success',"Post deleted successfully.");
+            req.session.save(()=>{
+                res.redirect(`/profile/${req.session.user.username}`)
+            })
+        }else{
+            req.flash('errors',"Post deleted failed.");
+            req.session.save(()=>{
+                res.redirect(`/profile/${req.session.user.username}`)
+            })
+        }
+    }).catch((err)=>{
+        req.flash('errors',err)
+        req.session.save(()=>{
+            res.redirect('/');
+        })
+    });
 }

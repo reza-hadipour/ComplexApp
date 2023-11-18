@@ -3,7 +3,7 @@ const app = express();
 const MongoStore = require('connect-mongo');
 const session = require('express-session');
 const flash = require('connect-flash');
-
+const markDown = require('marked');
 const routes = require('./routes/routes');
 
 app.use(express.urlencoded({extended:true}));
@@ -24,6 +24,8 @@ app.set('views','views');
 
 // To access data in views
 app.use((req,res,next)=>{
+
+    res.locals.markDownHTML = markDown;
 
     // make all success and error flash message access from all template
     res.locals.success = req.flash('success');
