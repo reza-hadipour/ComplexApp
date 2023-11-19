@@ -45,9 +45,7 @@ module.exports.showEditPost = async function(req,res){
     } catch (error) {
         res.render('404');
     }
-    
 }
-
 
 module.exports.editPost = function(req,res){
     let post = new Post(req.body, req.visitorId, req.params.id);
@@ -92,4 +90,11 @@ module.exports.deletePost = function(req,res){
             res.redirect('/');
         })
     });
+}
+
+module.exports.searchPost = function(req,res){
+    console.log('Searchinnng');
+    Post.search(req.body.searchItem)
+    .then(posts=>res.json(posts))
+    .catch(()=> res.json(['Nothing']))
 }

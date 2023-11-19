@@ -141,7 +141,7 @@ Post.getPostByAuthorId = function(authorId){
     })
 }
 
-Post.reusablePostQuery = function(uniqueOperation,visitorId){
+Post.reusablePostQuery = function(uniqueOperation,visitorId, secondOperation = []){
     return new Promise(async (resolve,reject)=>{
         let aggOperations = uniqueOperation.concat([{$lookup: {from: 'users', localField: 'author', foreignField: '_id', as: 'postAuthor'}},
         {$project: {
@@ -149,14 +149,16 @@ Post.reusablePostQuery = function(uniqueOperation,visitorId){
             'body': 1,
             'createdDate': 1,
             authorId : "$author",
-            author: {$arrayElemAt : ['$postAuthor',0]}
-        }}]);
+            author: {$arrayElemAt : ['$postAuthor',0]}}
+        }
+]).concat(secondOperation);
 
         let posts = await postCollection.aggregate(aggOperations).toArray();
         
         if(posts.length){
             posts.map((post=>{
                 post.isVisitorOwner = post.authorId.equals(visitorId);
+                post.authorId = undefined // After above line there is no need to send AuthorID 
                 post.author = {
                     authorId: post.author._id,
                     username: post.author.username,
@@ -170,6 +172,21 @@ Post.reusablePostQuery = function(uniqueOperation,visitorId){
             reject('Post not found.')
         }
     });
+}
+
+Post.search = function(searchItem){
+    return new Promise(async(resolve,reject)=>{
+        if( typeof(searchItem) == "string" ){
+            let cleanSearchItem = sanitizeHtml(searchItem);
+            Post.reusablePostQuery([
+                {$match: {$text: {$search: cleanSearchItem}}},
+            ], undefined , [{$sort: {score: {$meta: "textScore"}}}])
+                .then(posts=>resolve(posts))
+                .catch(err => console.log(err));
+        }else{
+            reject()
+        }
+    })
 }
 
 
