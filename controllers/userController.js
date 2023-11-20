@@ -57,8 +57,8 @@ module.exports.ifUserExists = function(req,res,next){
     .then(async (user)=>{
         // Get user's post
         let posts = await Post.getPostByAuthorId(user.userId);
-
         user.posts = posts;
+        user.isVisitorOwner = (user.userId).equals(req.visitorId);
         req.userProfile = user;
         next();
     }).catch(err=>{
@@ -80,16 +80,27 @@ module.exports.home = function(req,res,next){
 }
 
 module.exports.followUser = async (req,res)=>{
-
-    let userFollowRequest = req.params.username;
+    let userFollowRequestId = req.userProfile.userId.toHexString();
     
-    if(userFollowRequest != req.session.user.username){
+    if(userFollowRequestId != req.session.user.userId){
         //Check if visitor follow the User or not
-        console.log(req.userProfile);
-        // User.follow(req.userProfile.userId)
+        User.follow(req.visitorId,userFollowRequestId)
+        .then((result)=>{
+            console.log(result);
+            req.flash('success',`You followed ${req.userProfile.username} successfully`);
+            req.session.save(()=>{
+                res.redirect(`/profile/${req.userProfile.username}`);
+            })
+        })
+        .catch((err)=> {
+            req.flash('errors',err);
+            req.session.save(()=>{
+                res.redirect(`/profile/${req.userProfile.username}`);
+            })
+        });
     }else{
         req.flash('errors','You can`t follow your self.')
-        req.session.save(()=>req.redirect(`/profile/${userFollowRequest}`))
+        req.session.save(()=>res.redirect(`/profile/${req.userProfile.username}`))
     }
 }
 

@@ -1,7 +1,8 @@
 const userCollection = require('../db').collection('users');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
-
+const {ObjectId} = require('mongodb');
+const { default: isBoolean } = require('validator/lib/isboolean');
 
 let User = function(data){
     this.data = data;;
@@ -114,7 +115,7 @@ User.ifUserExists = async function(username){
     return new Promise(async (resolve,reject)=>{
         let user = await userCollection.findOne({'username': username});
         if(user){
-            user.password = undefined;
+            // user.password = undefined;
             user.userId = user._id;
             delete user._id;
             delete user.password;
@@ -129,7 +130,7 @@ User.ifUserExists = async function(username){
             //    'countOfFollowings' : user.countOfFollowings,
             //    'countOfPosts' : user.countOfPosts
             // };
-            console.log(user);
+            // console.log('If user exists: ',user);
             resolve(user);
         }else{
             reject('User profile not found')
@@ -140,8 +141,27 @@ User.ifUserExists = async function(username){
 
 User.follow = function(requesterUserId,targetUserId){
     return new Promise(async (resolve, reject) => {
-        let result = await userCollection.findOneAndUpdate({'_id' : new Object(requesterUserId)},{$push : {'followers': new Object(targetUserId)}});
-        resolve(result);
+        // console.log('requesterUserId: ',requesterUserId);
+        let user = await userCollection.findOne({_id: new ObjectId(requesterUserId)});
+        console.log('Follow function: ', user);
+        if(user){
+            // let followings = new Set([...user.followings]);
+            if(user.followings. includes(targetUserId)){
+                reject('You have followed this already.')
+                return
+            }
+
+            user.followings.push(targetUserId);
+            let result =  await userCollection.updateOne({_id: new ObjectId(requesterUserId)},{$set: {followings : [...user.followings]}, $inc:{ "countOfFollowings" : 1} })
+            // console.log(result);
+            if(result.modifiedCount){
+                resolve('success');
+            }else{
+                reject('failed');
+            }
+        }else{
+            reject('failed');
+        }
     });
 }
 
