@@ -93,8 +93,10 @@ module.exports.deletePost = function(req,res){
 }
 
 module.exports.searchPost = function(req,res){
-    console.log('Searchinnng');
     Post.search(req.body.searchItem)
     .then(posts=>res.json(posts))
-    .catch(()=> res.json(['Nothing']))
+    .catch((err)=> {
+        console.log('Error in searchPost: ', err);
+        res.json([]);
+    })
 }

@@ -166,7 +166,7 @@ Post.reusablePostQuery = function(uniqueOperation,visitorId, secondOperation = [
                 }
                 return post;
             }));
-            
+
             resolve(posts);
         }else{
             reject('Post not found.')
@@ -182,7 +182,7 @@ Post.search = function(searchItem){
                 {$match: {$text: {$search: cleanSearchItem}}},
             ], undefined , [{$sort: {score: {$meta: "textScore"}}}])
                 .then(posts=>resolve(posts))
-                .catch(err => console.log(err));
+                .catch(err => reject(err));
         }else{
             reject()
         }
