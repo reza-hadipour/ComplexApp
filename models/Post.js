@@ -181,7 +181,13 @@ Post.search = function(searchItem){
             Post.reusablePostQuery([
                 {$match: {$text: {$search: cleanSearchItem}}},
             ], undefined , [{$sort: {score: {$meta: "textScore"}}}])
-                .then(posts=>resolve(posts))
+                .then(posts=>{
+                    posts.map(post=>{
+                        post.body = post.body.substring(0,30);
+                        return post;
+                    })
+                    resolve(posts)
+                })
                 .catch(err => reject(err));
         }else{
             reject()

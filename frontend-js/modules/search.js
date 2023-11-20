@@ -47,7 +47,7 @@ export default class Search{
         this.showLoaderIcon();
         this.hideResultsArea();
         // Ask to request
-        this.typingWaitTimer =  setTimeout(()=>this.sendRequest(),750);
+        this.typingWaitTimer =  setTimeout(()=>this.sendRequest(),500);
       }
       this.previousValue = value;
       // console.log(value);
@@ -76,6 +76,7 @@ export default class Search{
           return `<a href="/post/${post._id}" class="list-group-item list-group-item-action">
           <img class="avatar-tiny" src="https://gravatar.com/avatar/b9216295c1e3931655bae6574ac0e4c2?s=128"> <strong>${post.title}</strong>
           <span class="text-muted small">by ${post.author.username} on ${postDate.getDate()}/${postDate.getMonth()+1}/${postDate.getFullYear()}</span>
+          <br><span class="text-muted small">${post.body}... <span class="text-primary">Read More</span></span>
           </a>`
         }).join('')}
         </div>`
