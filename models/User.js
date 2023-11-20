@@ -4,8 +4,13 @@ const bcrypt = require('bcrypt');
 
 
 let User = function(data){
-    this.data = data;
-    this.errors = []
+    this.data = data;;
+    this.followers = [];
+    this.countOfFollowers = 0;
+    this.followings = [];
+    this.countOfFollowings = 0;
+    this.countOfPosts = 0;
+    this.errors = [];
 }
 
 User.prototype.cleanUp = function(){
@@ -60,7 +65,12 @@ User.prototype.register = async function(){
             userCollection.insertOne({
                 'username':this.data.username,
                 'email': this.data.email,
-                'password': bcrypt.hashSync(this.data.password,10)
+                'password': bcrypt.hashSync(this.data.password,10),
+                'followers': this.followers,
+                'countOfFollowers' : this.countOfFollowers,
+                'followings' : this.followings,
+                'countOfFollowings' : this.countOfFollowings,
+                'countOfPosts' : this.countOfPosts
             }).then(info=>{
                 resolve({
                     userId: info.insertedId,
@@ -85,7 +95,12 @@ User.prototype.login = async function(){
                 resolve({
                     'userId': user._id,
                     'username': user.username,
-                    'email': user.email
+                    'email': user.email,
+                    'followers': user.followers,
+                    'countOfFollowers' : user.countOfFollowers,
+                    'followings' : user.followings,
+                    'countOfFollowings' : user.countOfFollowings,
+                    'countOfPosts' : user.countOfPosts
                 });
             }else{
                 reject('Login Failed.');
@@ -99,17 +114,35 @@ User.ifUserExists = async function(username){
     return new Promise(async (resolve,reject)=>{
         let user = await userCollection.findOne({'username': username});
         if(user){
-            user = {
-               'userId': user._id,
-               'username': user.username,
-               'email': user.email
-            };
+            user.password = undefined;
+            user.userId = user._id;
+            delete user._id;
+            delete user.password;
+            
+            // user = {
+            //    'userId': user._id,
+            //    'username': user.username,
+            //    'email': user.email,
+            //    'followers': user.followers,
+            //    'countOfFollowers' : user.countOfFollowers,
+            //    'followings' : user.followings,
+            //    'countOfFollowings' : user.countOfFollowings,
+            //    'countOfPosts' : user.countOfPosts
+            // };
+            console.log(user);
             resolve(user);
         }else{
             reject('User profile not found')
         }
     })
     
+}
+
+User.follow = function(requesterUserId,targetUserId){
+    return new Promise(async (resolve, reject) => {
+        let result = await userCollection.findOneAndUpdate({'_id' : new Object(requesterUserId)},{$push : {'followers': new Object(targetUserId)}});
+        resolve(result);
+    });
 }
 
 module.exports = User;

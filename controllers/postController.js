@@ -6,10 +6,13 @@ module.exports.showPost = async (req,res,next)=>{
     Post.getPostById(req.params.id, req.visitorId).then((data)=>{
         res.render('post',{post: data});
     }).catch(err=>{
-        req.flash('errors',err);
-        req.session.save(()=>{
-            res.render('404')
-        })
+        console.log(err);
+        res.render('404')
+
+        // req.flash('errors',err);
+        // req.session.save(()=>{
+        //     res.render('404')
+        // })
     })
 }
 

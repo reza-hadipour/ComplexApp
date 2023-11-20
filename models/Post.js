@@ -109,13 +109,18 @@ Post.deleteById = function(postId,visitorId){
 Post.getPostById = function(postId,visitorId){
     return new Promise(async (resolve,reject)=>{
         if(typeof(postId) == "string" && ObjectId.isValid(postId)){
-                Post.reusablePostQuery([{$match: {'_id': new ObjectId(postId)}}],visitorId)
-                .then((posts)=>{
+                let post = await Post.reusablePostQuery([{$match: {'_id': new ObjectId(postId)}}],visitorId)
+                if(post.length){
                     resolve(posts[0]);
-                })
-                .catch(err=>{
-                    reject(err);
-                })
+                }else{
+                    reject('Post not found')
+                }
+                // .then((posts)=>{
+                //     resolve(posts[0]);
+                // })
+                // .catch(err=>{
+                //     reject(err);
+                // })
         }else{
             reject('Invalid postId');
         }
@@ -123,22 +128,27 @@ Post.getPostById = function(postId,visitorId){
 }
 
 Post.getPostByAuthorId = function(authorId){
-    return new Promise(async (resolve,reject)=>{
-        if(ObjectId.isValid(authorId)){
-            Post.reusablePostQuery([
-                {$match: {'author': new ObjectId(authorId)}},
-                {$sort: {'createdDate' : -1}}
-            ])
-            .then((posts)=>{
-                resolve(posts);
-            })
-            .catch(err=>{
-                reject(err);
-            })
-        }else{
-            reject('Invalid AuthorId');
-        }
-    })
+    return Post.reusablePostQuery([
+        {$match: {author: new ObjectId(authorId)}},
+        {$sort: {createdDate: -1}}
+    ])
+    // return new Promise(async (resolve,reject)=>{
+    //     if(ObjectId.isValid(authorId)){
+    //             Post.reusablePostQuery([
+    //                 {$match: {'author': new ObjectId(authorId)}},
+    //                 {$sort: {'createdDate' : -1}}
+    //             ])
+    //             // resolve(posts);
+    //             .then((posts)=>{
+    //                 resolve(posts);
+    //             })
+    //             .catch(err=>{
+    //                 reject(err);
+    //             })
+    //     }else{
+    //         reject('Invalid AuthorId');
+    //     }
+    // })
 }
 
 Post.reusablePostQuery = function(uniqueOperation,visitorId, secondOperation = []){
@@ -155,22 +165,18 @@ Post.reusablePostQuery = function(uniqueOperation,visitorId, secondOperation = [
 
         let posts = await postCollection.aggregate(aggOperations).toArray();
         
-        if(posts.length){
-            posts.map((post=>{
-                post.isVisitorOwner = post.authorId.equals(visitorId);
-                post.authorId = undefined // After above line there is no need to send AuthorID 
-                post.author = {
-                    authorId: post.author._id,
-                    username: post.author.username,
-                    email: post.author.email
-                }
-                return post;
-            }));
+        posts.map((post=>{
+            post.isVisitorOwner = post.authorId.equals(visitorId);
+            post.authorId = undefined // After above line there is no need to send AuthorID 
+            post.author = {
+                authorId: post.author._id,
+                username: post.author.username,
+                email: post.author.email
+            }
+            return post;
+        }));
 
-            resolve(posts);
-        }else{
-            reject('Post not found.')
-        }
+        resolve(posts);
     });
 }
 

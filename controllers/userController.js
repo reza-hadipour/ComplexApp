@@ -62,6 +62,7 @@ module.exports.ifUserExists = function(req,res,next){
         req.userProfile = user;
         next();
     }).catch(err=>{
+        console.log(err);
         res.render('404')
     });
 }
@@ -75,6 +76,20 @@ module.exports.home = function(req,res,next){
         res.render('home-dashboard');
     }else{
         res.render('home-guest',{'regErrors': req.flash('regErrors')});
+    }
+}
+
+module.exports.followUser = async (req,res)=>{
+
+    let userFollowRequest = req.params.username;
+    
+    if(userFollowRequest != req.session.user.username){
+        //Check if visitor follow the User or not
+        console.log(req.userProfile);
+        // User.follow(req.userProfile.userId)
+    }else{
+        req.flash('errors','You can`t follow your self.')
+        req.session.save(()=>req.redirect(`/profile/${userFollowRequest}`))
     }
 }
 
