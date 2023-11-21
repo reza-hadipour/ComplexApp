@@ -130,7 +130,6 @@ User.ifUserExists = async function(username){
             //    'countOfFollowings' : user.countOfFollowings,
             //    'countOfPosts' : user.countOfPosts
             // };
-            // console.log('If user exists: ',user);
             resolve(user);
         }else{
             reject('User profile not found')
@@ -139,21 +138,35 @@ User.ifUserExists = async function(username){
     
 }
 
-User.follow = function(requesterUserId,targetUserId){
+User.followAction = function(requesterUserId,targetUserId, operation  = 'follow'){
     return new Promise(async (resolve, reject) => {
         // console.log('requesterUserId: ',requesterUserId);
         let user = await userCollection.findOne({_id: new ObjectId(requesterUserId)});
         console.log('Follow function: ', user);
         if(user){
-            // let followings = new Set([...user.followings]);
-            if(user.followings. includes(targetUserId)){
-                reject('You have followed this already.')
-                return
+            let followings = new Set(user.followings);
+            let incValue = 1;
+
+            if(operation == 'follow'){
+                if(followings.has(targetUserId)){
+                    reject('You have followed this already.')
+                    return
+                }else{
+                    incValue = 1;
+                    followings.add(targetUserId)
+                }
+            }else{
+                if(!followings.has(targetUserId)){
+                    reject('You have unfollowed this already.')
+                    return
+                }else{
+                    incValue = -1;
+                    followings.delete(targetUserId)
+                }
             }
 
-            user.followings.push(targetUserId);
-            let result =  await userCollection.updateOne({_id: new ObjectId(requesterUserId)},{$set: {followings : [...user.followings]}, $inc:{ "countOfFollowings" : 1} })
-            // console.log(result);
+            let result =  await userCollection.updateOne({_id: new ObjectId(requesterUserId)},{$set: {followings : [...followings]}, $inc:{ "countOfFollowings" : incValue} })
+            console.log(result);
             if(result.modifiedCount){
                 resolve('success');
             }else{
