@@ -2,7 +2,10 @@ const router = require('express').Router();
 // const userController = require('../controllers/userController');
 
 // User Controller
-const {register ,login ,logout ,ifUserExists ,showProfile ,home ,mustBeLoggedIn, followUser, unfollowUser} = require('../controllers/userController');
+const {register ,login ,logout ,home ,mustBeLoggedIn} = require('../controllers/userController');
+
+// Profile Controller
+const {showFollowers, showFollowings ,showProfile , ifUserExists, followUser, unfollowUser, sharedProfileData} = require('../controllers/profileController');
 
 // Post Controller
 const {showCreatePost ,createPost ,showPost, showEditPost, editPost, deletePost, searchPost, } = require('../controllers/postController');
@@ -23,7 +26,9 @@ router.post('/post/:id/edit', mustBeLoggedIn, editPost);
 router.post('/post/:id/delete', mustBeLoggedIn, deletePost);
 
 // Profile routes
-router.get('/profile/:username',ifUserExists, showProfile);
+router.get('/profile/:username',ifUserExists,sharedProfileData, showProfile);
+router.get('/profile/:username/followers',ifUserExists,sharedProfileData, showFollowers);
+router.get('/profile/:username/followings',ifUserExists,sharedProfileData, showFollowings);
 
 // Follow and unFollow
 router.post('/profile/:username/follow', ifUserExists, mustBeLoggedIn, followUser);

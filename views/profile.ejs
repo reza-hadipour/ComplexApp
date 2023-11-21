@@ -20,26 +20,10 @@
     <%- include('includes/flash') %>
 
     <h2><img class="avatar-small" src="https://gravatar.com/avatar/b9408a09298632b5151200f3449434ef?s=128"> <%= userProfile.username %>  
-      <% if(!userProfile.isVisitorOwner){ %>
-        <% if(userProfile.isFollowed) { %>
-          <form class="ml-2 d-inline" action="/profile/<%= userProfile.username %>/unfollow" method="POST">
-            <button class="btn btn-danger btn-sm">Unfollow <i class="fas fa-user-times"></i></button>
-          </form>
-        <% } else { %>
-          <form class="ml-2 d-inline" action="/profile/<%= userProfile.username %>/follow" method="POST">
-            <button class="btn btn-primary btn-sm">Follow <i class="fas fa-user-plus"></i></button>
-          </form>
-        <% } } %>
-        
       
-    </h2>
-  
-    <div class="profile-nav nav nav-tabs pt-2 mb-4">
-      <a href="#" class="profile-nav-link nav-item nav-link active">Posts: <%= userProfile.countOfPosts %></a>
-      <a href="#" class="profile-nav-link nav-item nav-link ">Followers: 3</a>
-      <a href="#" class="profile-nav-link nav-item nav-link ">Following: 2</a>
-    </div>
-  
+    <!-- Profile Shared Data -->
+    <%- include('includes/profileShared') %>
+
     <div class="list-group">
       
       <% userProfile.posts.forEach(post => { %>

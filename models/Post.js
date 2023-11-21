@@ -109,8 +109,8 @@ Post.deleteById = function(postId,visitorId){
 Post.getPostById = function(postId,visitorId){
     return new Promise(async (resolve,reject)=>{
         if(typeof(postId) == "string" && ObjectId.isValid(postId)){
-                let post = await Post.reusablePostQuery([{$match: {'_id': new ObjectId(postId)}}],visitorId)
-                if(post.length){
+                let posts = await Post.reusablePostQuery([{$match: {'_id': new ObjectId(postId)}}],visitorId)
+                if(posts.length){
                     resolve(posts[0]);
                 }else{
                     reject('Post not found')
@@ -201,5 +201,12 @@ Post.search = function(searchItem){
     })
 }
 
+
+Post.countPostsByAuthor = function(authorId){
+    return new Promise(async (resolver,reject)=>{
+        let postCount = await postCollection.countDocuments({'author' : new ObjectId(authorId)});
+        resolver(postCount)
+    })
+}
 
 module.exports = Post;

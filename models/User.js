@@ -2,15 +2,11 @@ const userCollection = require('../db').collection('users');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
 const {ObjectId} = require('mongodb');
-const { default: isBoolean } = require('validator/lib/isboolean');
 
 let User = function(data){
     this.data = data;;
-    this.followers = [];
-    this.countOfFollowers = 0;
     this.followings = [];
     this.countOfFollowings = 0;
-    this.countOfPosts = 0;
     this.errors = [];
 }
 
@@ -67,11 +63,8 @@ User.prototype.register = async function(){
                 'username':this.data.username,
                 'email': this.data.email,
                 'password': bcrypt.hashSync(this.data.password,10),
-                'followers': this.followers,
-                'countOfFollowers' : this.countOfFollowers,
                 'followings' : this.followings,
                 'countOfFollowings' : this.countOfFollowings,
-                'countOfPosts' : this.countOfPosts
             }).then(info=>{
                 resolve({
                     userId: info.insertedId,
@@ -97,11 +90,8 @@ User.prototype.login = async function(){
                     'userId': user._id,
                     'username': user.username,
                     'email': user.email,
-                    'followers': user.followers,
-                    'countOfFollowers' : user.countOfFollowers,
                     'followings' : user.followings,
                     'countOfFollowings' : user.countOfFollowings,
-                    'countOfPosts' : user.countOfPosts
                 });
             }else{
                 reject('Login Failed.');
@@ -124,12 +114,10 @@ User.ifUserExists = async function(username){
             //    'userId': user._id,
             //    'username': user.username,
             //    'email': user.email,
-            //    'followers': user.followers,
-            //    'countOfFollowers' : user.countOfFollowers,
             //    'followings' : user.followings,
             //    'countOfFollowings' : user.countOfFollowings,
-            //    'countOfPosts' : user.countOfPosts
             // };
+            // console.log(user);
             resolve(user);
         }else{
             reject('User profile not found')
@@ -142,7 +130,7 @@ User.followAction = function(requesterUserId,targetUserId, operation  = 'follow'
     return new Promise(async (resolve, reject) => {
         // console.log('requesterUserId: ',requesterUserId);
         let user = await userCollection.findOne({_id: new ObjectId(requesterUserId)});
-        console.log('Follow function: ', user);
+        // console.log('Follow function: ', user);
         if(user){
             let followings = new Set(user.followings);
             let incValue = 1;
@@ -166,7 +154,7 @@ User.followAction = function(requesterUserId,targetUserId, operation  = 'follow'
             }
 
             let result =  await userCollection.updateOne({_id: new ObjectId(requesterUserId)},{$set: {followings : [...followings]}, $inc:{ "countOfFollowings" : incValue} })
-            console.log(result);
+            // console.log(result);
             if(result.modifiedCount){
                 resolve('success');
             }else{
@@ -176,6 +164,43 @@ User.followAction = function(requesterUserId,targetUserId, operation  = 'follow'
             reject('failed');
         }
     });
+}
+
+User.listOfFollowers = function(userId){
+    return new Promise(async(resolve,reject)=>{
+        // Users who followed current user
+        let followers = await userCollection.find({'followings': userId}).toArray();
+        let followersData =  followers.map((follower)=>{
+            // console.log(follower.username);
+            return {
+                userId : follower._id,
+                username: follower.username
+            }
+        })
+        resolve([...followersData]);
+    })
+}
+
+User.countOfFollowers = function(userId){
+    return new Promise(async(resolve,reject)=>{
+        // Users who followed current user
+        let followers = await userCollection.countDocuments({'followings': userId});
+        resolve(followers);
+    })
+}
+
+User.listOfFollowings = function(userIds){
+    return new Promise(async(resolve,reject)=>{
+        // Users who followed profile
+        let followings = await userCollection.find({_id : {$in: userIds}}).toArray();
+        let followingsData =  followings.map((following)=>{
+            return {
+                userId : following._id,
+                username: following.username
+            }
+        })
+        resolve([...followingsData]);
+    })
 }
 
 module.exports = User;
