@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>OurApp</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <script defer src="https://use.fontawesome.com/releases/v5.5.0/js/all.js" integrity="sha384-GqVMZRt5Gn7tB9D9q7ONtcp4gtHIUEW/yG7h98J7IpE3kpi+srfFyyB/04OV6pG0" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i" rel="stylesheet">
+  <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+  <%- include('includes/header') %>
+  <!-- header ends here -->
+  
+  <div class="container py-md-5 container--narrow">
+    
+    <!-- Flash Messages -->
+    <%- include('includes/flash') %>
+
+    <h2><img class="avatar-small" src="https://gravatar.com/avatar/b9408a09298632b5151200f3449434ef?s=128"> <%= userProfile.username %>  
+      
+    <!-- Profile Shared Data -->
+    <%- include('includes/profileShared') %>
+
+    <div class="list-group">
+      
+      <% followings.forEach(following => { %>
+        <a href="/profile/<%=following.username%>" class="list-group-item list-group-item-action">
+          <img class="avatar-tiny" src="https://gravatar.com/avatar/b9408a09298632b5151200f3449434ef?s=128">
+          <strong><%= following.username %></strong>
+        </a>
+      <% }); %>
+      
+    </div>
+  </div>
+  
+  <!-- footer begins -->
+  <%- include('includes/footer') %>

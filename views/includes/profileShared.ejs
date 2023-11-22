@@ -1,0 +1,19 @@
+<% if(!userProfile.isVisitorOwner){ %>
+    <% if(userProfile.isFollowed) { %>
+      <form class="ml-2 d-inline" action="/profile/<%= userProfile.username %>/unfollow" method="POST">
+        <button class="btn btn-danger btn-sm">Unfollow <i class="fas fa-user-times"></i></button>
+      </form>
+    <% } else { %>
+      <form class="ml-2 d-inline" action="/profile/<%= userProfile.username %>/follow" method="POST">
+        <button class="btn btn-primary btn-sm">Follow <i class="fas fa-user-plus"></i></button>
+      </form>
+    <% } } %>
+    
+  
+</h2>
+
+<div class="profile-nav nav nav-tabs pt-2 mb-4">
+  <a href="/profile/<%= userProfile.username %>" class="profile-nav-link nav-item nav-link <%= profileAction == 'posts' ? 'active' : '' %>">Posts: <%= userProfile.countOfPosts %></a>
+  <a href="/profile/<%= userProfile.username %>/followers" class="profile-nav-link nav-item nav-link <%= profileAction == 'followers' ? 'active' : '' %>">Followers: <%= userProfile.countOfFollowers %></a>
+  <a href="/profile/<%= userProfile.username %>/followings" class="profile-nav-link nav-item nav-link <%= profileAction == 'followings' ? 'active' : '' %>">Following: <%= userProfile.countOfFollowings %></a>
+</div>

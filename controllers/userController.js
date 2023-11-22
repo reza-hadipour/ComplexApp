@@ -51,11 +51,5 @@ module.exports.mustBeLoggedIn = function(req,res,next){
     }
 }
 
-module.exports.home = function(req,res,next){
-    if(req.session.user){
-        res.render('home-dashboard');
-    }else{
-        res.render('home-guest',{'regErrors': req.flash('regErrors')});
-    }
-}
+
 
