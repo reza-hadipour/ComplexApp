@@ -164,6 +164,7 @@ Post.reusablePostQuery = function(uniqueOperation,visitorId, secondOperation = [
 ]).concat(secondOperation);
 
         let posts = await postCollection.aggregate(aggOperations).toArray();
+        // console.log(posts);
         
         posts.map((post=>{
             post.isVisitorOwner = post.authorId.equals(visitorId);
@@ -207,6 +208,14 @@ Post.countPostsByAuthor = function(authorId){
         let postCount = await postCollection.countDocuments({'author' : new ObjectId(authorId)});
         resolver(postCount)
     })
+}
+
+Post.getFeed = function(authorId){
+    return Post.reusablePostQuery([
+        {$match: {author: {$in: authorId.map(id=> new ObjectId(id))}}},
+        {$sort: {createdDate: -1}}
+    ])
+
 }
 
 module.exports = Post;

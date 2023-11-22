@@ -2,13 +2,14 @@ const router = require('express').Router();
 // const userController = require('../controllers/userController');
 
 // User Controller
-const {register ,login ,logout ,home ,mustBeLoggedIn} = require('../controllers/userController');
+const {register ,login ,logout ,mustBeLoggedIn} = require('../controllers/userController');
 
 // Profile Controller
-const {showFollowers, showFollowings ,showProfile , ifUserExists, followUser, unfollowUser, sharedProfileData} = require('../controllers/profileController');
+const {home, showFollowers, showFollowings ,showProfile , ifUserExists, followUser, unfollowUser, sharedProfileData} = require('../controllers/profileController');
 
 // Post Controller
 const {showCreatePost ,createPost ,showPost, showEditPost, editPost, deletePost, searchPost, } = require('../controllers/postController');
+
 
 router.get('/',home)
 
