@@ -67,6 +67,7 @@ module.exports.showProfile = async function(req,res,next){
     let posts = await Post.getPostByAuthorId(req.userProfile.userId);
     req.userProfile.posts = posts;
     req.session.save(()=>{
+        // console.log('UserProfile: ',req.userProfile);
         res.render('profile',{userProfile: req.userProfile, profileAction : 'posts'})
     })
 }
