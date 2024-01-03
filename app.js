@@ -8,6 +8,10 @@ const flash = require('connect-flash');
 const markDown = require('marked');
 const routes = require('./routes/routes');
 
+const {addNewSocket,getSockets,getSocketByUserId} = require('./controllers/socketController');
+const {saveChat,showChats} = require('./controllers/chatController');
+const Chat = require('./models/chat');
+
 let onlineUsers = new Map();
 let receiverSocketId = '';
 
@@ -106,6 +110,7 @@ io.engine.use(sessionOptions);  // To access req in socket
 // Private Chat
 io.on('connection', (socket) => {
   console.log('new socket connected ',socket.id);
+  console.log(onlineUsers);
 
   socket.on('saveMe', (senderUserId)=>{
     // Add new user into onlineUsers Map
@@ -148,6 +153,9 @@ io.on('connection', (socket) => {
       let {text} = data;
       console.log(`privateMessage from [${onlineUsers.get(data.sender)}] to [${onlineUsers.get(data.receiver)}], msg: ${text}`);
       io.to(receiver).emit('privateMessage',{sender: data.sender,text});
+      new Chat(data.sender,data.receiver,text).createChat()
+      .catch(err=>console.error(err));
+      
     }else{
       console.error('This message is going nowhere!!')
     }
