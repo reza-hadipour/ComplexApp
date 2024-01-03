@@ -7,8 +7,8 @@
         <% if( locals.userProfile ) {%>
           <span class="text-white mr-2 header-chat-icon" title="Chat" data-toggle="tooltip" data-placement="bottom"><i class="fas fa-comment"></i></span>
           <input id="receiver-user-id" type="hidden" value="<%= userProfile.userId %>">
+          <% } %>
           <input id="sender-user-id" type="hidden" value="<%= user.userId %>">
-        <% } %>
         <a href="/profile/<%= user.username %>" class="mr-2"><img title="My Profile" data-toggle="tooltip" data-placement="bottom" style="width: 32px; height: 32px; border-radius: 16px;" src="https://gravatar.com/avatar/f64fc44c03a8a7eb1d52502950879659?s=128"></a>
         <a class="btn btn-sm btn-success mr-2" href="/post/create">Create Post</a>
         <form action="/logout" method="POST" class="d-inline">

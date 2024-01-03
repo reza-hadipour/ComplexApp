@@ -10,8 +10,8 @@ export default class Chat{
         this.privateChat = false;
         this.chatWrapper = document.querySelector("#chat-wrapper")
         this.openIcon = document.querySelector(".header-chat-icon");
-        this.receiverUserId = document.getElementById("receiver-user-id").value;
-        this.senderUserId = document.getElementById("sender-user-id").value;
+        this.receiverUserId = document.getElementById("receiver-user-id")?.value ?? undefined;
+        this.senderUserId = document.getElementById("sender-user-id")?.value ?? undefined;
         this.injectHTML();
         this.chatLog = document.querySelector("#chat")
         this.chatField = document.querySelector("#chatField")
@@ -31,7 +31,11 @@ export default class Chat{
             // Send message to server
             this.sendMessageToServer()
         })
-        this.openIcon.addEventListener("click",()=>{this.showChat()})
+
+        if(this.openIcon){
+            this.openIcon.addEventListener("click",()=>{this.showChat()})
+        }
+        
         this.closeIcon.addEventListener("click", () => this.hideChat())
 
         
@@ -122,16 +126,19 @@ export default class Chat{
 
     listenForIncomingMessages(){
         this.socket.on('privateMessage',(data)=>{
-            console.log(`Received Private Message: ${data.text}`);
-            let text = `(pv) [${data.sender}]: ${data.text}`;
+            console.log(`Received Private Message [${data.sender}]: ${data.text}`);
             this.showChatForDisplay()
-            this.displayMessageFromServer({text})
+            this.displayMessageFromServer(data.text,data.sender)
         })
 
         this.socket.on('startPrivateChatResp',(message)=>{
             // Chat starter get this
             this.privateChat = true
             this.receiver = message.receiver;
+
+            // Show history
+            this.showHistory(message.history)
+            
             // console.log('this.privateChat turn true - listenForIncomingMessages() -> startPrivateChat');
 
             console.log(`Pv started from ${message.receiver}`);
@@ -142,15 +149,17 @@ export default class Chat{
             // Chat target this one
             this.privateChat = true
             this.receiver = message.sender;
-            console.log('this.privateChat turn true - listenForIncomingMessages() -> startPrivateChat');
+            // console.log('this.privateChat turn true - listenForIncomingMessages() -> startPrivateChat');
 
             console.log(`Pv started from ${message.sender}`);
+
+            this.showHistory(message.history)
             // this.sendPrivateMessageRequest();
         })
         
         this.socket.on('privateChatError',(message)=>{
             this.privateChat = false;
-            console.log('this.privateChat turn false - listenForIncomingMessages() -> privateChatError');
+            // console.log('this.privateChat turn false - listenForIncomingMessages() -> privateChatError');
 
             console.error('Private Chat Error: ',message);
             this.hideChat();
@@ -163,13 +172,13 @@ export default class Chat{
     //     this.socket.emit("privateChatReq",({'sender': this.senderUserId,'receiver':this.receiverUserId}));
     // }
 
-    displayMessageFromServer(data){
+    displayMessageFromServer(message,sender = undefined){
         this.chatLog.insertAdjacentHTML('beforeend',`
         <div class="chat-other">
             <a href="/profile/"><img class="avatar-tiny" src=""></a>
             <div class="chat-message"><div class="chat-message-inner">
-            <a href="/profile/"><strong>User:</strong></a>
-            ${data.text}
+            <a href="/profile/"><strong>${sender ?? 'User'}:</strong></a>
+            ${message}
             </div></div>
         </div>
         `)
@@ -193,24 +202,44 @@ export default class Chat{
         // this.socket.emit(this.receiverUserId, {sender: this.senderUserId ,message: this.chatField.value})
 
         // this.socket.emit('privateMessage',"Hello","user1");
-        console.log('isPrivate :', this.privateChat);
+        // console.log('isPrivate :', this.privateChat);
         this.socket.emit('chatMessage', {isPrivate: this.privateChat ,sender: this.senderUserId ,receiver: this.receiver ,text: this.chatField.value})
         // this.socket.emit('chatMessage', {room: this.receiverUserId ,text: this.chatField.value}) // changed
-        this.chatLog.insertAdjacentHTML('beforeend',`
-        <div class="chat-self">
-            <div class="chat-message">
-                <div class="chat-message-inner">
-                    ${this.chatField.value}
-                </div>
-            </div>
-            <img class="chat-avatar avatar-tiny" src="${this.avatar}">
-        </div>
-        `)
+        this.displaySenderMessage(this.chatField.value)
         this.chatLog.scrollTo = this.chatLog.scrollHeight
         this.chatField.value = ''
         this.chatField.focus()
     }
 
+    displaySenderMessage(message){
+        this.chatLog.insertAdjacentHTML('beforeend',`
+        <div class="chat-self">
+            <div class="chat-message">
+                <div class="chat-message-inner">
+                    ${message}
+                </div>
+            </div>
+            <img class="chat-avatar avatar-tiny" src="${this.avatar}">
+        </div>
+        `)
+        this.chatLog.scrollTop = this.chatLog.scrollHeight
+    }
+
+    showHistory(history){
+        // console.log('senderUserId: ',this.senderUserId);
+        // console.log(history);
+
+        // Clear existing messages
+        this.chatLog.innerHTML = '';
+
+        history.forEach(element => {
+            if(element.sender == this.senderUserId){
+                this.displaySenderMessage(`You: ${element.msg}`)
+            }else{
+                this.displayMessageFromServer(element.msg,element.senderUsername)
+            }
+        });
+    }
 
     // sayHello(){
     //     this.socket.on('655b75c3f7ba4b886d59aeaa',(data)=>{
