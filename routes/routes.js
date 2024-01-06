@@ -16,7 +16,6 @@ const {saveChat, showChats} = require('../controllers/chatController');
 // Socket Controller
 const {addNewSocket,getSocketByUserId,getSockets} = require('../controllers/socketController');
 
-
 router.get('/',home)
 
 router.post('/register',register)
