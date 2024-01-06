@@ -10,6 +10,11 @@ const {home, showFollowers, showFollowings ,showProfile , ifUserExists, followUs
 // Post Controller
 const {showCreatePost ,createPost ,showPost, showEditPost, editPost, deletePost, searchPost, } = require('../controllers/postController');
 
+// Chat Controller
+const {saveChat, showChats} = require('../controllers/chatController');
+
+// Socket Controller
+const {addNewSocket,getSocketByUserId,getSockets} = require('../controllers/socketController');
 
 router.get('/',home)
 
@@ -38,5 +43,13 @@ router.post('/profile/:username/unfollow', ifUserExists, mustBeLoggedIn, unfollo
 // Search
 router.post('/search', searchPost);
 
+// Chat
+router.post('/chat',saveChat);
+router.get('/chat', showChats);
+
+// Socket
+router.post('/socket',addNewSocket)
+router.get('/socket',getSockets)
+router.get('/socket/byUser',getSocketByUserId)
 
 module.exports = router;
